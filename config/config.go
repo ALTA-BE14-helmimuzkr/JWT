@@ -12,6 +12,8 @@ type AppConfig struct {
 	DBHost string
 	DBPort int
 	DBName string
+
+	JWTKEY string
 }
 
 func InitConfig() *AppConfig {

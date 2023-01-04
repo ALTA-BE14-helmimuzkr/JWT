@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,16 +15,27 @@ import (
 // meneruskan input ke bagian proses,
 // memberikan respon ke user
 type UserControll struct {
-	Mdl model.UserModel
+	Mdl    model.UserModel
+	JWTKey string
 }
 
-func CreateToken(userId int) (string, error) {
+func CreateToken(userId int, JWTKey string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["userID"] = userId
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
+
+	// Create token with claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte("BE!4a|t3rr4"))
+
+	// Generate encoded token
+	tokenBearer, err := token.SignedString([]byte(JWTKey))
+	if err != nil {
+		log.Println("Generate token barier gagal", err.Error())
+		return "", err
+	}
+
+	return tokenBearer, nil
 }
 
 func ExtractToken(e echo.Context) int {
@@ -56,7 +67,7 @@ func (uc *UserControll) Login() echo.HandlerFunc {
 				"message": err.Error(),
 			})
 		}
-		jwtToken, err := CreateToken(int(res.ID))
+		jwtToken, err := CreateToken(int(res.ID), uc.JWTKey)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
@@ -106,14 +117,6 @@ func (uc *UserControll) GetAll() echo.HandlerFunc {
 func (uc *UserControll) GetID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := ExtractToken(c)
-		// paramID := c.Param("id")
-		// cnvID, err := strconv.Atoi(paramID)
-		// if err != nil {
-		// 	log.Println("convert id error ", err.Error())
-		// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
-		// 		"message": "gunakan input angka",
-		// 	})
-		// }
 		res, err := uc.Mdl.GetByID(id)
 		if err != nil {
 			log.Println("query error", err.Error())

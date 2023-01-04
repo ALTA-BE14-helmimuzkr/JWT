@@ -6,42 +6,45 @@ import (
 	"api/model"
 	"log"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
+	// Init Echo
 	e := echo.New()
+
+	// Setup Database
 	cfg := config.InitConfig()
 	db := config.InitDB(*cfg)
 	config.Migrate(db)
-	model := model.UserModel{DB: db}
-	controll := controller.UserControll{Mdl: model}
 
+	// Setup Model
+	userModel := model.UserModel{DB: db}
+
+	// Setup Controller
+	userController := controller.UserControll{
+		Mdl:    userModel,
+		JWTKey: cfg.JWTKEY,
+	}
+
+	// Setup Middleware
 	e.Pre(middleware.RemoveTrailingSlash()) // fungsi ini dijalankan sebelum routing
-
-	e.Use(middleware.CORS()) // WAJIB DIPAKAI agar tidak terjadi masalah permission
+	e.Use(middleware.CORS())                // WAJIB DIPAKAI agar tidak terjadi masalah permission
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n",
+		Format: "${time_custom}, ${method}, ${uri}, status=${status}\n", CustomTimeFormat: "2006-01-02 15:04:05",
 	}))
-	// e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-	// 	Format: "method=${method}, uri=${uri}, status=${status}\n",
-	// }))
-	// e.Use(middleware.Logger()) // Dipakai untuk membuat log (catatan) ketika endpoint diakses
 
-	e.POST("/register", controll.Insert())
-	e.GET("/users", controll.GetAll())
+	// Route
+	e.POST("/register", userController.Insert())
+	e.POST("/login", userController.Login())
 
-	e.POST("/login", controll.Login())
-
-	needLogin := e.Group("/users")
-	needLogin.Use(middleware.JWT([]byte("BE!4a|t3rr4")))
-
-	needLogin.GET("", controll.GetID())
-	needLogin.PATCH("/patch", controll.Update())
-	// PATCH localhost:8000/users/:id/patch
-	needLogin.PUT("", controll.Update2())
-	needLogin.DELETE("", controll.Delete())
+	user := e.Group("/users", echojwt.JWT([]byte(cfg.JWTKEY)))
+	user.GET("/list", userController.GetAll())
+	user.GET("/profile", userController.GetID())
+	user.PUT("/update", userController.Update())
+	user.DELETE("/delete", userController.Delete())
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
