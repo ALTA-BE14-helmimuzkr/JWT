@@ -4,10 +4,11 @@ import "gorm.io/gorm"
 
 type Good struct {
 	gorm.Model
-	UserID int    `json:"user_id"`
-	User   User   `gorm:"constraint"`
-	Name   string `json:"name" form:"nama"`
-	Qty    string `json:"qty" form:"qty"`
+	UserID int   `json:"user_id"`
+	User   *User `json:"-" gorm:"constraint"`
+	// User User   ` gorm:"constraint"`
+	Name string `json:"name" form:"nama"`
+	Qty  int    `json:"qty" form:"qty"`
 }
 
 type GoodModel struct {
