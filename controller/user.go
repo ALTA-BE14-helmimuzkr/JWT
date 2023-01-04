@@ -15,7 +15,7 @@ import (
 // meneruskan input ke bagian proses,
 // memberikan respon ke user
 type UserControll struct {
-	Mdl    model.UserModel
+	Mdl    *model.UserModel
 	JWTKey string
 }
 
@@ -56,7 +56,6 @@ func (uc *UserControll) Login() echo.HandlerFunc {
 		}
 
 		res, err := uc.Mdl.Login(tmp.Email, tmp.Password)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "matched") {
 				return c.JSON(http.StatusBadRequest, map[string]interface{}{
