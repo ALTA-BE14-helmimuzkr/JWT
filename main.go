@@ -46,14 +46,14 @@ func main() {
 	e.POST("/login", userController.Login())
 
 	user := e.Group("/users", echojwt.JWT([]byte(cfg.JWTKEY)))
-	user.GET("/", userController.GetAll())
+	user.GET("", userController.GetAll())
 	user.GET("/profile", userController.GetID())
-	user.PUT("/", userController.Update())
-	user.DELETE("/", userController.Delete())
+	user.PUT("", userController.Update())
+	user.DELETE("", userController.Delete())
 
 	good := e.Group("/goods", echojwt.JWT([]byte(cfg.JWTKEY)))
-	good.GET("/", goodController.GetAll())
-	good.POST("/", goodController.Create())
+	good.GET("", goodController.GetAll())
+	good.POST("", goodController.Create())
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
