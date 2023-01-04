@@ -22,10 +22,15 @@ func main() {
 
 	// Setup Model
 	userModel := model.UserModel{DB: db}
+	goodModel := model.GoodModel{DB: db}
 
 	// Setup Controller
 	userController := controller.UserControll{
-		Mdl:    userModel,
+		Mdl:    &userModel,
+		JWTKey: cfg.JWTKEY,
+	}
+	goodController := controller.GoodController{
+		Mdl:    &goodModel,
 		JWTKey: cfg.JWTKEY,
 	}
 
@@ -41,10 +46,14 @@ func main() {
 	e.POST("/login", userController.Login())
 
 	user := e.Group("/users", echojwt.JWT([]byte(cfg.JWTKEY)))
-	user.GET("/list", userController.GetAll())
+	user.GET("/", userController.GetAll())
 	user.GET("/profile", userController.GetID())
-	user.PUT("/update", userController.Update())
-	user.DELETE("/delete", userController.Delete())
+	user.PUT("/", userController.Update())
+	user.DELETE("/", userController.Delete())
+
+	good := e.Group("/goods", echojwt.JWT([]byte(cfg.JWTKEY)))
+	good.GET("/", goodController.GetAll())
+	good.POST("/", goodController.Create())
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
