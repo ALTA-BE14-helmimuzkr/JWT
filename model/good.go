@@ -12,7 +12,7 @@ type Good struct {
 	UserID int   `json:"user_id"`
 	User   *User `json:"-" gorm:"constraint"`
 	// User User   ` gorm:"constraint"`
-	Name string `json:"name" form:"nama"`
+	Name string `json:"name" form:"name"`
 	Qty  int    `json:"qty" form:"qty"`
 }
 
@@ -65,6 +65,14 @@ func (gm *GoodModel) Update(good Good) (Good, error) {
 	if tx.Error != nil {
 		return Good{}, tx.Error
 	}
+
+	affRow := tx.RowsAffected
+
+	if affRow <= 0 {
+		log.Println("no data processed")
+		return Good{}, errors.New("tidak ada data yang dirubah")
+	}
+
 	return good, nil
 }
 

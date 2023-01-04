@@ -2,6 +2,7 @@ package controller
 
 import (
 	"api/model"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -88,10 +89,21 @@ func (gc *GoodController) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, "format inputan salah")
 		}
 
+		goodID, err := strconv.Atoi(c.Param("id")) // id barang dari uri parameter
+		if err != nil {
+			log.Println("convert id error ", err.Error())
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"message": "gunakan input angka",
+			})
+		}
+		good.ID = uint(goodID)
+
 		userID := ExtractToken(c) // id pemilik dari proses extract token
 		good.UserID = userID
 
-		good, err := gc.Mdl.Update(good)
+		fmt.Println(good)
+
+		good, err = gc.Mdl.Update(good)
 		if err != nil {
 			log.Println("query error", err.Error())
 			return c.JSON(http.StatusInternalServerError, "tidak bisa diproses")
@@ -115,7 +127,7 @@ func (gc *GoodController) Delete() echo.HandlerFunc {
 			})
 		}
 
-		err = gc.Mdl.Delete(userID, goodID)
+		err = gc.Mdl.Delete(goodID, userID)
 		if err != nil {
 			log.Println("query error", err.Error())
 			return c.JSON(http.StatusInternalServerError, "tidak bisa diproses")

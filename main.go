@@ -55,8 +55,8 @@ func main() {
 	good.GET("", goodController.GetAll())
 	good.GET("/:id", goodController.GetByID())
 	good.POST("", goodController.Create())
-	good.POST("/:id", goodController.Update())
-	good.POST("/:id", goodController.Delete())
+	good.PUT("/:id", goodController.Update())
+	good.DELETE("/:id", goodController.Delete())
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
