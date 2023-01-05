@@ -2,7 +2,6 @@ package controller
 
 import (
 	"api/model"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -24,6 +23,10 @@ func (gc *GoodController) Create() echo.HandlerFunc {
 		}
 
 		good.UserID = ExtractToken(c) // id pemilik dari proses extract token
+		if good.UserID < 1 {
+			log.Println("unauthorized")
+			return c.JSON(http.StatusUnauthorized, "tidak boleh mengakses kesini")
+		}
 
 		good, err := gc.Mdl.Insert(good)
 		if err != nil {
@@ -42,6 +45,11 @@ func (gc *GoodController) Create() echo.HandlerFunc {
 func (gc *GoodController) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userID := ExtractToken(c) // id pemilik dari proses extract token
+		if userID < 1 {
+			log.Println("unauthorized")
+			return c.JSON(http.StatusUnauthorized, "tidak boleh mengakses kesini")
+		}
+
 		goods, err := gc.Mdl.GetAll(userID)
 		if err != nil {
 			log.Println("query error", err.Error())
@@ -58,7 +66,12 @@ func (gc *GoodController) GetAll() echo.HandlerFunc {
 // Mendapatkan barang punya pemilik yang dipilih menggunakan id barang
 func (gc *GoodController) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userID := ExtractToken(c)                  // id pemilik dari proses extract token
+		userID := ExtractToken(c) // id pemilik dari proses extract token
+		if userID < 1 {
+			log.Println("unauthorized")
+			return c.JSON(http.StatusUnauthorized, "tidak boleh mengakses kesini")
+		}
+
 		goodID, err := strconv.Atoi(c.Param("id")) // id barang dari uri parameter
 		if err != nil {
 			log.Println("convert id error ", err.Error())
@@ -98,8 +111,10 @@ func (gc *GoodController) Update() echo.HandlerFunc {
 		good.ID = uint(goodID)
 
 		good.UserID = ExtractToken(c) // id pemilik dari proses extract token
-
-		fmt.Println(good)
+		if good.UserID < 1 {
+			log.Println("unauthorized")
+			return c.JSON(http.StatusUnauthorized, "tidak boleh mengakses kesini")
+		}
 
 		good, err = gc.Mdl.Update(good)
 		if err != nil {
@@ -116,7 +131,12 @@ func (gc *GoodController) Update() echo.HandlerFunc {
 
 func (gc *GoodController) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userID := ExtractToken(c)                  // id pemilik dari token
+		userID := ExtractToken(c) // id pemilik dari token
+		if userID < 1 {
+			log.Println("unauthorized")
+			return c.JSON(http.StatusUnauthorized, "tidak boleh mengakses kesini")
+		}
+
 		goodID, err := strconv.Atoi(c.Param("id")) // id barang dari uri parameter
 		if err != nil {
 			log.Println("convert id error ", err.Error())

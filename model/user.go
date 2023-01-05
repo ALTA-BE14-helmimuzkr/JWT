@@ -10,10 +10,11 @@ import (
 
 type User struct {
 	gorm.Model
-	Name     string `json:"name" form:"nama"`
-	HP       string `json:"hp" form:"hp"`
-	Email    string `json:"email" form:"email"`
-	Password string `json:"password" form:"password"`
+	Name     string  `json:"name" form:"nama"`
+	HP       string  `json:"hp" form:"hp"`
+	Email    string  `json:"email" form:"email"`
+	Password string  `json:"password" form:"password"`
+	Goods    *[]Good `json:"-"`
 }
 
 type UserModel struct {

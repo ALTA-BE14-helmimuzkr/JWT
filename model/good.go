@@ -35,7 +35,6 @@ func (gm *GoodModel) GetAll(userID int) ([]Good, error) {
 	goods := []Good{}
 	tx := gm.DB.
 		Where("goods.user_id = ?", userID).
-		Joins("JOIN users ON users.id = goods.id").
 		Find(&goods)
 	if tx.Error != nil {
 		return nil, tx.Error
