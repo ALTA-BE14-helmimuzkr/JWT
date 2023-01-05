@@ -23,8 +23,7 @@ func (gc *GoodController) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, "format inputan salah")
 		}
 
-		userID := ExtractToken(c) // id pemilik dari proses extract token
-		good.UserID = userID
+		good.UserID = ExtractToken(c) // id pemilik dari proses extract token
 
 		good, err := gc.Mdl.Insert(good)
 		if err != nil {
@@ -98,8 +97,7 @@ func (gc *GoodController) Update() echo.HandlerFunc {
 		}
 		good.ID = uint(goodID)
 
-		userID := ExtractToken(c) // id pemilik dari proses extract token
-		good.UserID = userID
+		good.UserID = ExtractToken(c) // id pemilik dari proses extract token
 
 		fmt.Println(good)
 
